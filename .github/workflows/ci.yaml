@@ -1,0 +1,33 @@
+name: CI
+on:
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - '.gitignore'
+    branches:
+      - main
+  push:
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - '.gitignore'
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run the tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Setup Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.15.6'
+    - name: Check formatting
+      run: test -z $(gofmt -l **.go)
+    - name: Run GDQBot tests
+      run: |
+        go test -v -coverprofile=coverage.txt -covermode=atomic
