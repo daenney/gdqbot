@@ -16,6 +16,8 @@ const (
 	dateFormat    = "%s, the %s of %s at %02d:%02d UTC (%04d)"
 )
 
+type filteredHandler func(filter string) (*event.MessageEventContent, error)
+
 func (b *bot) msgScheduleForEvent(filter string) (*event.MessageEventContent, error) {
 	s, err := b.cache.Get("sched")
 	if err != nil {
