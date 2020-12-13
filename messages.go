@@ -47,6 +47,13 @@ func (b *bot) msgScheduleNext() (*event.MessageEventContent, error) {
 	}
 
 	e := s.(*gdq.Schedule).NextEvent()
+	if e == nil {
+		return &event.MessageEventContent{
+			Body:    "There are currently no further events scheduled.",
+			MsgType: event.MsgNotice,
+		}, nil
+	}
+
 	return &event.MessageEventContent{
 		Body:          fmt.Sprintf("The next event is: %s", plainEvent(e)),
 		MsgType:       event.MsgNotice,
