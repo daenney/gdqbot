@@ -50,7 +50,7 @@ func (b *bot) msgScheduleNext() (*event.MessageEventContent, error) {
 	return &event.MessageEventContent{
 		Body:          fmt.Sprintf("The next event is: %s", plainEvent(e)),
 		MsgType:       event.MsgNotice,
-		Format:        "org.matrix.custom.html",
+		Format:        event.FormatHTML,
 		FormattedBody: fmt.Sprintf("The next event is: %s", htmlEvent(e)),
 	}, nil
 }
@@ -63,7 +63,7 @@ func (b *bot) msgHelp() (*event.MessageEventContent, error) {
 		Diacritics, capitalisation and punctuation are ignored when checking for matches. If the command doesn't 
 		match, it's interpreted as 'event <rest>' The 'next' command returns the next/upcoming run.`,
 		MsgType: event.MsgNotice,
-		Format:  "org.matrix.custom.html",
+		Format:  event.FormatHTML,
 	}, nil
 }
 
@@ -97,7 +97,7 @@ func msgSchedule(s *gdq.Schedule) *event.MessageEventContent {
 	return &event.MessageEventContent{
 		Body:          plainBuilder.String(),
 		MsgType:       event.MsgNotice,
-		Format:        "org.matrix.custom.html",
+		Format:        event.FormatHTML,
 		FormattedBody: htmlBuilder.String(),
 	}
 }
