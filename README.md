@@ -4,7 +4,7 @@
 <h4 align="center">A Matrix bot for Games Done Quick</h4>
 <p align="center">
     <a href="https://github.com/daenney/gdqbot/actions?query=workflow%3ACI"><img src="https://github.com/daenney/gdqbot/workflows/CI/badge.svg" alt="Build Status"></a>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/daenney/gdqbot?style=flat-square" alt="License: AGPLv3"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/daenney/gdqbot" alt="License: AGPLv3"></a>
 </p>
 
 [Games Done Quick (GDQ)](https://gamesdonequick.com/) is a regular
