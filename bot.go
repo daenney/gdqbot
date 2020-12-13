@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ReneKroon/ttlcache/v2"
+	"github.com/daenney/gdq"
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
@@ -33,6 +35,7 @@ var filter = mautrix.Filter{
 // bot represents our bot
 type bot struct {
 	client *mautrix.Client
+	cache  *ttlcache.Cache
 }
 
 func newBot(homeserverURL, userID, domain, accessToken string) (b *bot, err error) {
@@ -44,7 +47,19 @@ func newBot(homeserverURL, userID, domain, accessToken string) (b *bot, err erro
 
 	b = &bot{
 		client: client,
+		cache:  ttlcache.NewCache(),
 	}
+
+	b.cache.SkipTTLExtensionOnHit(true)
+	b.cache.SetTTL(10 * time.Minute)
+	b.cache.SetLoaderFunction(func(key string) (data interface{}, ttl time.Duration, err error) {
+		s, err := gdq.GetSchedule(gdq.Latest, safeClient)
+		if err != nil {
+			log.Print("loader: failed to load schedule into cache")
+		}
+		return s, 10 * time.Minute, err
+	})
+	b.primeCache()
 
 	fID, err := b.client.CreateFilter(&filter)
 	if err != nil {
@@ -59,6 +74,17 @@ func newBot(homeserverURL, userID, domain, accessToken string) (b *bot, err erro
 	syncer.OnEventType(event.StateMember, b.handleMembership)
 
 	return b, nil
+}
+
+func (b *bot) primeCache() {
+	s, err := gdq.GetSchedule(gdq.Latest, safeClient)
+	if err != nil {
+		log.Print("primer: failed to load cache with schedule")
+		return
+	}
+	b.cache.SetWithTTL("sched", s, 10*time.Minute)
+	log.Print("primer: loaded cache with schedule")
+	return
 }
 
 func (b *bot) handleMessage(ms mautrix.EventSource, ev *event.Event) {
@@ -83,21 +109,21 @@ func (b *bot) handleMessage(ms mautrix.EventSource, ev *event.Event) {
 
 	fields := strings.Split(content, " ")
 	if len(fields) < 2 {
-		msg, err = msgHelp()
+		msg, err = b.msgHelp()
 	} else {
 		switch fields[1] {
 		case "event", "title":
-			msg, err = msgScheduleForEvent(strings.Join(fields[2:], " "))
+			msg, err = b.msgScheduleForEvent(strings.Join(fields[2:], " "))
 		case "runner":
-			msg, err = msgScheduleForRunner(strings.Join(fields[2:], " "))
+			msg, err = b.msgScheduleForRunner(strings.Join(fields[2:], " "))
 		case "host":
-			msg, err = msgScheduleForHost(strings.Join(fields[2:], " "))
+			msg, err = b.msgScheduleForHost(strings.Join(fields[2:], " "))
 		case "next":
-			msg, err = msgScheduleNext()
+			msg, err = b.msgScheduleNext()
 		case "help":
-			msg, err = msgHelp()
+			msg, err = b.msgHelp()
 		default:
-			msg, err = msgScheduleForEvent(strings.Join(fields[1:], ""))
+			msg, err = b.msgScheduleForEvent(strings.Join(fields[1:], ""))
 		}
 	}
 

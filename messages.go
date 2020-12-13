@@ -16,37 +16,37 @@ const (
 	dateFormat    = "%s, the %s of %s at %02d:%02d UTC (%04d)"
 )
 
-func msgScheduleForEvent(filter string) (*event.MessageEventContent, error) {
-	s, err := gdq.GetSchedule(gdq.Latest, safeClient)
+func (b *bot) msgScheduleForEvent(filter string) (*event.MessageEventContent, error) {
+	s, err := b.cache.Get("sched")
 	if err != nil {
 		return nil, err
 	}
-	return msgSchedule(s.ForTitle(filter)), nil
+	return msgSchedule(s.(*gdq.Schedule).ForTitle(filter)), nil
 }
 
-func msgScheduleForRunner(filter string) (*event.MessageEventContent, error) {
-	s, err := gdq.GetSchedule(gdq.Latest, safeClient)
+func (b *bot) msgScheduleForRunner(filter string) (*event.MessageEventContent, error) {
+	s, err := b.cache.Get("sched")
 	if err != nil {
 		return nil, err
 	}
-	return msgSchedule(s.ForRunner(filter)), nil
+	return msgSchedule(s.(*gdq.Schedule).ForRunner(filter)), nil
 }
 
-func msgScheduleForHost(filter string) (*event.MessageEventContent, error) {
-	s, err := gdq.GetSchedule(gdq.Latest, safeClient)
+func (b *bot) msgScheduleForHost(filter string) (*event.MessageEventContent, error) {
+	s, err := b.cache.Get("sched")
 	if err != nil {
 		return nil, err
 	}
-	return msgSchedule(s.ForHost(filter)), nil
+	return msgSchedule(s.(*gdq.Schedule).ForHost(filter)), nil
 }
 
-func msgScheduleNext() (*event.MessageEventContent, error) {
-	s, err := gdq.GetSchedule(gdq.Latest, safeClient)
+func (b *bot) msgScheduleNext() (*event.MessageEventContent, error) {
+	s, err := b.cache.Get("sched")
 	if err != nil {
 		return nil, err
 	}
 
-	e := s.NextEvent()
+	e := s.(*gdq.Schedule).NextEvent()
 	return &event.MessageEventContent{
 		Body:          fmt.Sprintf("The next event is: %s", plainEvent(e)),
 		MsgType:       event.MsgNotice,
@@ -55,7 +55,7 @@ func msgScheduleNext() (*event.MessageEventContent, error) {
 	}, nil
 }
 
-func msgHelp() (*event.MessageEventContent, error) {
+func (b *bot) msgHelp() (*event.MessageEventContent, error) {
 	return &event.MessageEventContent{
 		Body: `Supported commands are 'help', 'next', 'event|title', 'host' and 'runner'. The 'event|title', 
 		'host' and 'runner' commands let you filter the schedule matching either the name of a game, the runner 
