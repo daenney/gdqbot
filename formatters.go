@@ -9,14 +9,8 @@ import (
 )
 
 func formatMetadata(event *gdq.Event) (runners, hosts, estimate string) {
-	runners = "unknown"
-	if len(event.Runners) > 0 {
-		runners = formatHandles(event.Runners)
-	}
-	hosts = "unknown"
-	if len(event.Hosts) > 0 {
-		hosts = formatHandles(event.Hosts)
-	}
+	runners = formatHandles(event.Runners)
+	hosts = formatHandles(event.Hosts)
 	estimate = "unknown amount of time"
 	if event.Estimate.Duration != 0 {
 		estimate = event.Estimate.String()
@@ -27,7 +21,7 @@ func formatMetadata(event *gdq.Event) (runners, hosts, estimate string) {
 func formatHandles(elems []string) string {
 	switch len(elems) {
 	case 0:
-		return ""
+		return "unknown"
 	case 1:
 		return elems[0]
 	case 2:
