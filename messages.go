@@ -63,7 +63,6 @@ func (b *bot) msgHelp() (*event.MessageEventContent, error) {
 		Diacritics, capitalisation and punctuation are ignored when checking for matches. If the command doesn't 
 		match, it's interpreted as 'event <rest>' The 'next' command returns the next/upcoming run.`,
 		MsgType: event.MsgNotice,
-		Format:  event.FormatHTML,
 	}, nil
 }
 
