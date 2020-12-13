@@ -10,7 +10,7 @@ import (
 
 const (
 	htmlEventMsg  = "<b>%s</b> on %s run by <i>%s</i> with commentary from <i>%s</i> lasting %s"
-	plainEventMsg = "%s on %s run by %s with commentary from %s lasting %s\n"
+	plainEventMsg = "%s on %s run by %s with commentary from %s lasting %s"
 	singleMatch   = "There is one event matching your query:"
 	multiMatch    = "There are multiple events matching your query:"
 	dateFormat    = "%s, the %s of %s at %02d:%02d UTC (%04d)"
@@ -87,7 +87,7 @@ func msgSchedule(s *gdq.Schedule) *event.MessageEventContent {
 	num := len(s.Events)
 	for i, event := range s.Events {
 		htmlBuilder.WriteString("<li>" + htmlEvent(event) + "</li>")
-		plainBuilder.WriteString("* " + plainEvent(event))
+		plainBuilder.WriteString("* " + plainEvent(event) + "\n")
 		if i == num-1 {
 			htmlBuilder.WriteString("</ul>")
 		}
