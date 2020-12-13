@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -37,6 +38,9 @@ func (*transport) RoundTrip(req *http.Request) (*http.Response, error) {
 var safeClient = &http.Client{Transport: &transport{}}
 
 func newMatrixClient(homeserverURL string, userID id.UserID, accessToken string) (*mautrix.Client, error) {
+	if homeserverURL == "" {
+		return nil, fmt.Errorf("received empty homeserver URL")
+	}
 	hsURL, err := url.Parse(homeserverURL)
 	if err != nil {
 		return nil, err
