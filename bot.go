@@ -55,7 +55,7 @@ func newBot(homeserverURL, userID, domain, accessToken string) (b *bot, err erro
 	b.cache.SetLoaderFunction(func(key string) (data interface{}, ttl time.Duration, err error) {
 		s, err := gdq.GetSchedule(gdq.Latest, safeClient)
 		if err != nil {
-			log.Print("loader: failed to load schedule into cache")
+			log.Printf("loader: failed to load schedule into cache: %s\n", err)
 		}
 		return s, 10 * time.Minute, err
 	})
