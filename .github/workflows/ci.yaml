@@ -1,22 +1,17 @@
 name: CI
 on:
   pull_request:
-    paths-ignore:
-      - 'README.md'
-      - 'LICENSE'
-      - '.gitignore'
+    paths:
+      - '**.go'
     branches:
       - main
   push:
-    paths-ignore:
-      - 'README.md'
-      - 'LICENSE'
-      - '.gitignore'
+    paths:
+      - '**.go'
     branches:
       - main
     tags-ignore:
       - '**'
-
 
 jobs:
   test:
