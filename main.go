@@ -12,8 +12,14 @@ func main() {
 	domain := flag.String("domain", "", "Matrix domain, for example 'matrix.org'. If it's the same as -homeserver you can omit it")
 	token := flag.String("access-token", "", "Access token, or use the GDQBOT_ACCESS_TOKEN environment variable")
 	user := flag.String("user", "", "Username for the bot, without the @. For example 'gdqbot'")
+	showVersion := flag.Bool("version", false, "show GDQBot version and build info")
 
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Fprintf(os.Stdout, "{\"version\": \"%s\", \"commit\": \"%s\", \"date\": \"%s\"}\n", version, commit, date)
+		os.Exit(0)
+	}
 
 	if *hs == "" {
 		log.Fatalln("No homeserver specified, please specify using -homeserver")
