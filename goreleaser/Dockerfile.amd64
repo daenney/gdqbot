@@ -1,0 +1,3 @@
+FROM gcr.io/distroless/base-debian10:nonroot-amd64
+COPY gdqbot /
+ENTRYPOINT ["/gdqbot"]

@@ -1,0 +1,80 @@
+builds:
+  - id: bot
+    binary: gdqbot
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    flags:
+      - -trimpath
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 7
+archives:
+  - id: bot
+    builds:
+      - bot
+    wrap_in_directory: true
+    files:
+      - LICENSE
+      - README.md
+    format_overrides:
+      - goos: windows
+        format: zip
+dockers:
+  - goos: linux
+    goarch: arm64
+    binaries:
+      - gdqbot
+    builds:
+      - bot
+    dockerfile: goreleaser/Dockerfile.arm64
+    image_templates:
+      - "docker.pkg.github.com/daenney/{{.ProjectName}}:arm64-{{ .Tag }}"
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.licenses=AGPL-3.0-or-later"
+      - "--label=org.opencontainers.image.source=https://github.com/daenney/gdqbot"
+  - goos: linux
+    goarch: amd64
+    binaries:
+      - gdqbot
+    builds:
+      - bot
+    dockerfile: goreleaser/Dockerfile.amd64
+    image_templates:
+      - "docker.pkg.github.com/daenney/{{.ProjectName}}:amd64-{{ .Tag }}"
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.licenses=AGPL-3.0-or-later"
+      - "--label=org.opencontainers.image.source=https://github.com/daenney/gdqbot"
+  - goos: linux
+    goarch: arm
+    goarm: 7
+    binaries:
+      - gdqbot
+    builds:
+      - bot
+    dockerfile: goreleaser/Dockerfile.armhf
+    image_templates:
+      - "docker.pkg.github.com/daenney/{{.ProjectName}}:armhf-{{ .Tag }}"
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.licenses=AGPL-3.0-or-later"
+      - "--label=org.opencontainers.image.source=https://github.com/daenney/gdqbot"
