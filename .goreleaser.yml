@@ -34,7 +34,7 @@ dockers:
       - bot
     dockerfile: goreleaser/Dockerfile.arm64
     image_templates:
-      - "docker.pkg.github.com/daenney/{{.ProjectName}}:arm64-{{ .Tag }}"
+      - "ghcr.io/daenney/{{.ProjectName}}:arm64-{{ .Tag }}"
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -51,7 +51,7 @@ dockers:
       - bot
     dockerfile: goreleaser/Dockerfile.amd64
     image_templates:
-      - "docker.pkg.github.com/daenney/{{.ProjectName}}:amd64-{{ .Tag }}"
+      - "ghcr.io/daenney/{{.ProjectName}}:amd64-{{ .Tag }}"
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -69,7 +69,7 @@ dockers:
       - bot
     dockerfile: goreleaser/Dockerfile.armhf
     image_templates:
-      - "docker.pkg.github.com/daenney/{{.ProjectName}}:armhf-{{ .Tag }}"
+      - "ghcr.io/daenney/{{.ProjectName}}:armhf-{{ .Tag }}"
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
