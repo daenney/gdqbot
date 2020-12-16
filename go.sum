@@ -4,8 +4,8 @@ github.com/ReneKroon/ttlcache/v2 v2.1.0/go.mod h1:0E5EIhFJrGmcn/niHrqnnvQHvihj+D
 github.com/anaskhan96/soup v1.2.4 h1:or+sKs9QbzJGZVTYFmTs2VBateEywoq00a6K14z331E=
 github.com/anaskhan96/soup v1.2.4/go.mod h1:6YnEp9A2yywlYdM4EgDz9NEHclocMepEtku7wg6Cq3s=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
-github.com/daenney/gdq v0.0.0-20201213145614-b60383ef790d h1:5N9LyYuhu2J3I/Jo/i6xdmUH2I/DFUJ9dYb7942akCY=
-github.com/daenney/gdq v0.0.0-20201213145614-b60383ef790d/go.mod h1:AQaEDnPOgfTTYUlb6yku/tyWYpF/W8wl4n8qZayJdOQ=
+github.com/daenney/gdq v1.0.1 h1:IbTRArhDdBX699GZfU8z/K4fAIkPHmwlGR+v0sGhYsI=
+github.com/daenney/gdq v1.0.1/go.mod h1:AQaEDnPOgfTTYUlb6yku/tyWYpF/W8wl4n8qZayJdOQ=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
