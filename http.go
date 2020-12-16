@@ -2,11 +2,8 @@ package main
 
 import (
 	"fmt"
-	"net"
 	"net/http"
 	"net/url"
-	"runtime"
-	"time"
 
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/id"
@@ -14,25 +11,11 @@ import (
 
 const userAgent = "gdqbot (+https://github.com/daenney/gdq)"
 
-var defaultTrasnport = &http.Transport{
-	Proxy: http.ProxyFromEnvironment,
-	DialContext: (&net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: 30 * time.Second,
-		DualStack: true,
-	}).DialContext,
-	MaxIdleConns:          100,
-	IdleConnTimeout:       90 * time.Second,
-	TLSHandshakeTimeout:   10 * time.Second,
-	ExpectContinueTimeout: 1 * time.Second,
-	MaxIdleConnsPerHost:   runtime.NumCPU() + 1,
-}
-
 type transport struct{}
 
 func (*transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.Header.Set("User-Agent", userAgent)
-	return defaultTrasnport.RoundTrip(req)
+	return http.DefaultTransport.RoundTrip(req)
 }
 
 var safeClient = &http.Client{Transport: &transport{}}
