@@ -43,6 +43,33 @@ and builds on the `nonroot` version of the image. This means the bot never
 runs as root, regardless of user remapping/user namespacing. This image
 can/should be run as read-only.
 
+#### `docker run`
+
+```sh
+$ docker run --name matrix-gdqbot -e GDQBOT_ACCESS_TOKEN=<token> ghcr.io/daeney/gdqbot:<tag> \
+  -homeserver https://example.com \
+  -user @gdqbot:example.com
+```
+
+#### `docker-compose`
+
+```yaml
+---
+version: "2.0"
+
+services:
+  matrix-gdq-bot:
+    image: ghcr.io/daenney/gdqbot:<tag>
+    container_name: matrix-gdqbot
+    restart: unless-stopped
+    command:
+      - -homeserver https://example.com
+      - -user @gdqbot:example.com
+    environment:
+      - GDQBOT_ACCESS_TOKEN=secret_value_goes_here
+
+```
+
 ## Building
 
 You can `go get` the code, or `git clone` and then run a `go build` followed

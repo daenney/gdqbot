@@ -38,8 +38,8 @@ type bot struct {
 	cache  *ttlcache.Cache
 }
 
-func newBot(homeserverURL, userID, domain, accessToken string) (b *bot, err error) {
-	uid := id.NewUserID(userID, domain)
+func newBot(homeserverURL, userID, accessToken string) (b *bot, err error) {
+	uid := id.UserID(userID)
 	client, err := newMatrixClient(homeserverURL, uid, accessToken)
 	if err != nil {
 		return nil, err

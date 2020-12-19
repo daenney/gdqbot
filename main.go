@@ -9,9 +9,8 @@ import (
 
 func main() {
 	hs := flag.String("homeserver", "", "Homeserver URL, for example 'matrix.org', or 'https://domain.tld:8843/'")
-	domain := flag.String("domain", "", "Matrix domain, for example 'matrix.org'. If it's the same as -homeserver you can omit it")
 	token := flag.String("access-token", "", "Access token, or use the GDQBOT_ACCESS_TOKEN environment variable")
-	user := flag.String("user", "", "Username for the bot, without the @. For example 'gdqbot'")
+	user := flag.String("user", "", "Matrix ID for the bot, @bot:domain.tld")
 	showVersion := flag.Bool("version", false, "show GDQBot version and build info")
 
 	flag.Parse()
@@ -33,11 +32,8 @@ func main() {
 	if *token == "" {
 		log.Fatalln("No access token specified, please specify using -access-token or set the GDQBOT_ACCESS_TOKEN environment variable")
 	}
-	if *domain == "" {
-		*domain = *hs
-	}
 
-	b, err := newBot(*hs, *user, *domain, *token)
+	b, err := newBot(*hs, *user, *token)
 	if err != nil {
 		log.Fatalln(fmt.Errorf("couldn't initialise the bot: %s", err))
 	}
