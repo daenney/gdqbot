@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -39,7 +41,20 @@ func main() {
 	}
 
 	log.Print("syncing timeline and handling requests")
-	if err := b.client.Sync(); err != nil {
-		log.Fatalln(fmt.Errorf("sync encountered an error: %s", err))
-	}
+
+	go func() {
+		if err := b.client.Sync(); err != nil {
+			b.client.Client.CloseIdleConnections()
+			log.Fatalf("sync encountered an error: %s\n", err)
+		}
+	}()
+
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	s := <-c
+	log.Printf("received %s, shutting down...", s.String())
+	b.client.StopSync()
+	b.client.Client.CloseIdleConnections()
+	os.Exit(0)
 }
