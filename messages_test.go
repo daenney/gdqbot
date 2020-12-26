@@ -350,3 +350,18 @@ func TestMessageForRunnerHostEvent(t *testing.T) {
 		}
 	})
 }
+
+func TestAnnounceEventMessage(t *testing.T) {
+	b := &bot{
+		cache: ttlcache.NewCache(),
+	}
+
+	msg := b.msgAnnounce(&gdq.Event{
+		Title:    "first game",
+		Runners:  []string{"first runner"},
+		Hosts:    []string{"first host"},
+		Start:    time.Date(1900, 12, 1, 13, 37, 0, 0, time.UTC),
+		Estimate: gdq.Duration{Duration: 20 * time.Minute},
+	})
+	assertContains(t, msg.Body, "is starting in approximately")
+}

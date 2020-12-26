@@ -56,8 +56,9 @@ var filter = mautrix.Filter{
 
 // bot represents our bot
 type bot struct {
-	client *mautrix.Client
-	cache  *ttlcache.Cache
+	client    *mautrix.Client
+	cache     *ttlcache.Cache
+	announcer *time.Timer
 }
 
 func newBot(homeserverURL, userID, accessToken string) (b *bot, err error) {
@@ -79,6 +80,9 @@ func newBot(homeserverURL, userID, accessToken string) (b *bot, err error) {
 		if err != nil {
 			log.Printf("loader: failed to load schedule into cache: %s\n", err)
 		}
+		// reset the announcer timer when the cache gets reloaded to ensure
+		// we notice schedule changes
+		b.announcer.Reset(1 * time.Second)
 		return s, 10 * time.Minute, err
 	})
 	b.primeCache()
@@ -92,6 +96,8 @@ func newBot(homeserverURL, userID, accessToken string) (b *bot, err error) {
 	syncer := b.client.Syncer.(*mautrix.DefaultSyncer)
 	syncer.OnEventType(event.EventMessage, b.handleMessage)
 	syncer.OnEventType(event.StateMember, b.handleMembership)
+
+	b.announcer = time.NewTimer(5 * time.Second)
 
 	return b, nil
 }

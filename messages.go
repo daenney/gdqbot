@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/daenney/gdq"
 	"maunium.net/go/mautrix/event"
@@ -62,6 +63,16 @@ func (b *bot) msgScheduleNext() (*event.MessageEventContent, error) {
 		Format:        event.FormatHTML,
 		FormattedBody: fmt.Sprintf("The next event is: %s", htmlEvent(e)),
 	}, nil
+}
+
+func (b *bot) msgAnnounce(e *gdq.Event) *event.MessageEventContent {
+	d := gdq.Duration{Duration: e.Start.Sub(time.Now().UTC())}
+	return &event.MessageEventContent{
+		Body:          fmt.Sprintf("An event is starting in approximately %s: %s", d, plainEvent(e)),
+		MsgType:       event.MsgNotice,
+		Format:        event.FormatHTML,
+		FormattedBody: fmt.Sprintf("An event is starting in approximately %s: %s", d, htmlEvent(e)),
+	}
 }
 
 func (b *bot) msgHelp() (*event.MessageEventContent, error) {

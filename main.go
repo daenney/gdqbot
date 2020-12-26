@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -49,11 +50,20 @@ func main() {
 		}
 	}()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func(ctx context.Context) {
+		b.announce(ctx)
+		log.Println("started announcer routine")
+	}(ctx)
+
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
 	s := <-c
 	log.Printf("received %s, shutting down...", s.String())
+	cancel()
 	b.client.StopSync()
 	b.client.Client.CloseIdleConnections()
 	os.Exit(0)
