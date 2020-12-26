@@ -58,7 +58,7 @@ var filter = mautrix.Filter{
 type bot struct {
 	Client    *mautrix.Client
 	cache     *ttlcache.Cache
-	Announcer *time.Timer
+	announcer *time.Timer
 }
 
 func New(homeserverURL, userID, accessToken string) (b *bot, err error) {
@@ -82,7 +82,7 @@ func New(homeserverURL, userID, accessToken string) (b *bot, err error) {
 		}
 		// reset the announcer timer when the cache gets reloaded to ensure
 		// we notice schedule changes
-		b.Announcer.Reset(1 * time.Second)
+		b.announcer.Reset(1 * time.Second)
 		return s, 10 * time.Minute, err
 	})
 	b.primeCache()
@@ -97,7 +97,7 @@ func New(homeserverURL, userID, accessToken string) (b *bot, err error) {
 	syncer.OnEventType(event.EventMessage, b.handleMessage)
 	syncer.OnEventType(event.StateMember, b.handleMembership)
 
-	b.Announcer = time.NewTimer(5 * time.Second)
+	b.announcer = time.NewTimer(5 * time.Second)
 
 	return b, nil
 }

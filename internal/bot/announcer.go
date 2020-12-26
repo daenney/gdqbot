@@ -14,11 +14,11 @@ func (b *bot) Announce(ctx context.Context) {
 	var last string
 	for {
 		select {
-		case <-b.Announcer.C:
+		case <-b.announcer.C:
 			s, err := b.cache.Get("sched")
 			if err != nil {
 				// Retry a bit later if we can't load the schedule
-				b.Announcer.Reset(10 * time.Second)
+				b.announcer.Reset(10 * time.Second)
 				continue
 			}
 
@@ -29,13 +29,13 @@ func (b *bot) Announce(ctx context.Context) {
 				// At this point there's no known future events so lets take a
 				// long nap and check again later
 				last = ""
-				b.Announcer.Reset(1 * time.Hour)
+				b.announcer.Reset(1 * time.Hour)
 				continue
 			}
 
 			if last == ev.Title {
 				log.Printf("already announced: %s, skipping", ev.Title)
-				b.Announcer.Reset(dur)
+				b.announcer.Reset(dur)
 				continue
 			}
 
@@ -43,7 +43,7 @@ func (b *bot) Announce(ctx context.Context) {
 				// We don't want to announce events more than 10min
 				// before the start time
 				log.Printf("not announcing: %s, event is too far in the future: %s\n", ev.Title, dur)
-				b.Announcer.Reset(dur - 10*time.Minute)
+				b.announcer.Reset(dur - 10*time.Minute)
 				continue
 			}
 
@@ -52,7 +52,7 @@ func (b *bot) Announce(ctx context.Context) {
 			rooms, err := b.Client.JoinedRooms()
 			if err != nil {
 				// Assume some temporary issue occurred, retry in a bit
-				b.Announcer.Reset(5 * time.Second)
+				b.announcer.Reset(5 * time.Second)
 			}
 
 			sendTo := []id.RoomID{}
@@ -78,10 +78,10 @@ func (b *bot) Announce(ctx context.Context) {
 
 			last = ev.Title
 			// Reset the timer to fire once the event we just announced has started
-			b.Announcer.Reset(dur)
+			b.announcer.Reset(dur)
 		case <-ctx.Done():
-			if !b.Announcer.Stop() {
-				<-b.Announcer.C
+			if !b.announcer.Stop() {
+				<-b.announcer.C
 			}
 			return
 		}
