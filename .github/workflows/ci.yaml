@@ -28,4 +28,4 @@ jobs:
       run: test -z $(gofmt -l **.go)
     - name: Run GDQBot tests
       run: |
-        go test -v -coverprofile=coverage.txt -covermode=atomic
+        go test -v -coverprofile=coverage.txt -covermode=atomic ./...

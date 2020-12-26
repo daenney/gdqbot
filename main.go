@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/daenney/gdqbot/internal/bot"
 )
 
 func main() {
@@ -36,7 +38,7 @@ func main() {
 		log.Fatalln("No access token specified, please specify using -access-token or set the GDQBOT_ACCESS_TOKEN environment variable")
 	}
 
-	b, err := newBot(*hs, *user, *token)
+	b, err := bot.New(*hs, *user, *token)
 	if err != nil {
 		log.Fatalln(fmt.Errorf("couldn't initialise the bot: %s", err))
 	}
@@ -44,8 +46,8 @@ func main() {
 	log.Print("syncing timeline and handling requests")
 
 	go func() {
-		if err := b.client.Sync(); err != nil {
-			b.client.Client.CloseIdleConnections()
+		if err := b.Client.Sync(); err != nil {
+			b.Client.Client.CloseIdleConnections()
 			log.Fatalf("sync encountered an error: %s\n", err)
 		}
 	}()
@@ -54,7 +56,7 @@ func main() {
 	defer cancel()
 
 	go func(ctx context.Context) {
-		b.announce(ctx)
+		b.Announce(ctx)
 		log.Println("started announcer routine")
 	}(ctx)
 
@@ -64,7 +66,7 @@ func main() {
 	s := <-c
 	log.Printf("received %s, shutting down...", s.String())
 	cancel()
-	b.client.StopSync()
-	b.client.Client.CloseIdleConnections()
+	b.Client.StopSync()
+	b.Client.Client.CloseIdleConnections()
 	os.Exit(0)
 }

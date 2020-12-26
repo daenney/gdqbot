@@ -1,4 +1,4 @@
-package main
+package bot
 
 import (
 	"bufio"
@@ -56,12 +56,12 @@ var filter = mautrix.Filter{
 
 // bot represents our bot
 type bot struct {
-	client    *mautrix.Client
+	Client    *mautrix.Client
 	cache     *ttlcache.Cache
-	announcer *time.Timer
+	Announcer *time.Timer
 }
 
-func newBot(homeserverURL, userID, accessToken string) (b *bot, err error) {
+func New(homeserverURL, userID, accessToken string) (b *bot, err error) {
 	uid := id.UserID(userID)
 	client, err := newMatrixClient(homeserverURL, uid, accessToken)
 	if err != nil {
@@ -69,7 +69,7 @@ func newBot(homeserverURL, userID, accessToken string) (b *bot, err error) {
 	}
 
 	b = &bot{
-		client: client,
+		Client: client,
 		cache:  ttlcache.NewCache(),
 	}
 
@@ -82,22 +82,22 @@ func newBot(homeserverURL, userID, accessToken string) (b *bot, err error) {
 		}
 		// reset the announcer timer when the cache gets reloaded to ensure
 		// we notice schedule changes
-		b.announcer.Reset(1 * time.Second)
+		b.Announcer.Reset(1 * time.Second)
 		return s, 10 * time.Minute, err
 	})
 	b.primeCache()
 
-	fID, err := b.client.CreateFilter(&filter)
+	fID, err := b.Client.CreateFilter(&filter)
 	if err != nil {
 		return nil, err
 	}
-	b.client.Store.SaveFilterID(uid, fID.FilterID)
+	b.Client.Store.SaveFilterID(uid, fID.FilterID)
 
-	syncer := b.client.Syncer.(*mautrix.DefaultSyncer)
+	syncer := b.Client.Syncer.(*mautrix.DefaultSyncer)
 	syncer.OnEventType(event.EventMessage, b.handleMessage)
 	syncer.OnEventType(event.StateMember, b.handleMembership)
 
-	b.announcer = time.NewTimer(5 * time.Second)
+	b.Announcer = time.NewTimer(5 * time.Second)
 
 	return b, nil
 }
@@ -163,7 +163,7 @@ func (b *bot) handleMessage(ms mautrix.EventSource, ev *event.Event) {
 	}
 
 	msg.SetReply(ev)
-	_, err = b.client.SendMessageEvent(ev.RoomID, event.EventMessage, msg)
+	_, err = b.Client.SendMessageEvent(ev.RoomID, event.EventMessage, msg)
 	if err != nil {
 		log.Printf("failed to send message: %s", err)
 	}
@@ -176,7 +176,7 @@ func (b *bot) handleMembership(_ mautrix.EventSource, ev *event.Event) {
 		return
 	}
 
-	if *ev.StateKey != b.client.UserID.String() {
+	if *ev.StateKey != b.Client.UserID.String() {
 		// Ignore it if it's not meant for us
 		return
 	}
@@ -184,7 +184,7 @@ func (b *bot) handleMembership(_ mautrix.EventSource, ev *event.Event) {
 	log.Print("attempting to join room: ", ev.RoomID)
 
 	time.Sleep(1 * time.Second)
-	_, err := b.client.JoinRoom(ev.RoomID.String(), "", struct{}{})
+	_, err := b.Client.JoinRoom(ev.RoomID.String(), "", struct{}{})
 	if err != nil {
 		log.Printf("failed to join room: %s, error: %s\n", ev.RoomID, err.Error())
 	}

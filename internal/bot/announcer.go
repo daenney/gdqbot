@@ -1,4 +1,4 @@
-package main
+package bot
 
 import (
 	"context"
@@ -10,15 +10,15 @@ import (
 	"maunium.net/go/mautrix/id"
 )
 
-func (b *bot) announce(ctx context.Context) {
+func (b *bot) Announce(ctx context.Context) {
 	var last string
 	for {
 		select {
-		case <-b.announcer.C:
+		case <-b.Announcer.C:
 			s, err := b.cache.Get("sched")
 			if err != nil {
 				// Retry a bit later if we can't load the schedule
-				b.announcer.Reset(10 * time.Second)
+				b.Announcer.Reset(10 * time.Second)
 				continue
 			}
 
@@ -29,13 +29,13 @@ func (b *bot) announce(ctx context.Context) {
 				// At this point there's no known future events so lets take a
 				// long nap and check again later
 				last = ""
-				b.announcer.Reset(1 * time.Hour)
+				b.Announcer.Reset(1 * time.Hour)
 				continue
 			}
 
 			if last == ev.Title {
 				log.Printf("already announced: %s, skipping", ev.Title)
-				b.announcer.Reset(dur)
+				b.Announcer.Reset(dur)
 				continue
 			}
 
@@ -43,21 +43,21 @@ func (b *bot) announce(ctx context.Context) {
 				// We don't want to announce events more than 10min
 				// before the start time
 				log.Printf("not announcing: %s, event is too far in the future: %s\n", ev.Title, dur)
-				b.announcer.Reset(dur - 10*time.Minute)
+				b.Announcer.Reset(dur - 10*time.Minute)
 				continue
 			}
 
 			// It's time to announce something!
 			log.Printf("announcing: %s, duration is: %s\n", ev.Title, dur)
-			rooms, err := b.client.JoinedRooms()
+			rooms, err := b.Client.JoinedRooms()
 			if err != nil {
 				// Assume some temporary issue occurred, retry in a bit
-				b.announcer.Reset(5 * time.Second)
+				b.Announcer.Reset(5 * time.Second)
 			}
 
 			sendTo := []id.RoomID{}
 			for _, room := range rooms.JoinedRooms {
-				members, err := b.client.JoinedMembers(room)
+				members, err := b.Client.JoinedMembers(room)
 				if err != nil {
 					log.Printf("failed to retrieve memberships for room: %s", room)
 					// Skip rooms we can't figure out the members for
@@ -70,7 +70,7 @@ func (b *bot) announce(ctx context.Context) {
 			msg := b.msgAnnounce(ev)
 
 			for _, room := range sendTo {
-				_, err := b.client.SendMessageEvent(room, event.EventMessage, msg)
+				_, err := b.Client.SendMessageEvent(room, event.EventMessage, msg)
 				if err != nil {
 					log.Printf("failed to announce event: %s to room: %s\n", ev.Title, room)
 				}
@@ -78,10 +78,10 @@ func (b *bot) announce(ctx context.Context) {
 
 			last = ev.Title
 			// Reset the timer to fire once the event we just announced has started
-			b.announcer.Reset(dur)
+			b.Announcer.Reset(dur)
 		case <-ctx.Done():
-			if !b.announcer.Stop() {
-				<-b.announcer.C
+			if !b.Announcer.Stop() {
+				<-b.Announcer.C
 			}
 			return
 		}
