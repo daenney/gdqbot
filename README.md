@@ -14,6 +14,8 @@ amazing runners and supported with great commentary and prizes to win.
 
 This [Matrix](https://matrix.org) bot lets you:
 * Query for information about the current/upcoming GDQ schedule
+* Announces upcoming events into all joined rooms (except if rooms have less
+  than three participants because that's our heuristic for a DM)
 
 Add the bot to a server, open a DM and issue `!gdq` or `!gdq help` to get
 instructions.
