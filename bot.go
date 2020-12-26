@@ -13,7 +13,15 @@ import (
 	"maunium.net/go/mautrix/id"
 )
 
+const eventID = "io.github.daenney.gdqbot.internal"
+
 var filter = mautrix.Filter{
+	AccountData: mautrix.FilterPart{
+		Limit: 20,
+		NotTypes: []event.Type{
+			event.NewEventType(eventID),
+		},
+	},
 	Room: mautrix.RoomFilter{
 		Timeline: mautrix.FilterPart{
 			Types: []event.Type{
@@ -68,8 +76,6 @@ func newBot(homeserverURL, userID, accessToken string) (b *bot, err error) {
 	b.client.Store.SaveFilterID(uid, fID.FilterID)
 
 	syncer := b.client.Syncer.(*mautrix.DefaultSyncer)
-	oev := &mautrix.OldEventIgnorer{UserID: client.UserID}
-	oev.Register(b.client.Syncer.(mautrix.ExtensibleSyncer))
 	syncer.OnEventType(event.EventMessage, b.handleMessage)
 	syncer.OnEventType(event.StateMember, b.handleMembership)
 

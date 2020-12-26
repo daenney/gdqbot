@@ -31,13 +31,16 @@ func newMatrixClient(homeserverURL string, userID id.UserID, accessToken string)
 	if hsURL.Scheme == "" {
 		hsURL.Scheme = "https"
 	}
-	return &mautrix.Client{
+	c := &mautrix.Client{
 		AccessToken:   accessToken,
 		HomeserverURL: hsURL,
 		UserID:        userID,
 		Client:        safeClient,
 		Prefix:        mautrix.URLPath{"_matrix", "client", "r0"},
 		Syncer:        mautrix.NewDefaultSyncer(),
-		Store:         mautrix.NewInMemoryStore(),
-	}, nil
+	}
+	store := mautrix.NewAccountDataStore(eventID, c)
+	c.Store = store
+
+	return c, nil
 }
