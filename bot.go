@@ -24,9 +24,17 @@ var filter = mautrix.Filter{
 	},
 	Room: mautrix.RoomFilter{
 		Timeline: mautrix.FilterPart{
+			Limit: 20,
 			Types: []event.Type{
 				event.EventMessage,
 				event.StateMember,
+			},
+		},
+		Ephemeral: mautrix.FilterPart{
+			Limit: 20,
+			NotTypes: []event.Type{
+				event.EphemeralEventTyping,
+				event.EphemeralEventReceipt,
 			},
 		},
 	},
@@ -37,6 +45,12 @@ var filter = mautrix.Filter{
 		"state_key",
 		"content.body",
 		"content.membership",
+	},
+	Presence: mautrix.FilterPart{
+		Limit: 20,
+		NotTypes: []event.Type{
+			event.EphemeralEventPresence,
+		},
 	},
 }
 
