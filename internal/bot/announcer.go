@@ -12,7 +12,7 @@ import (
 
 func (b *bot) resetTimer() {
 	go func() {
-		b.announcer <- struct{}{}
+		b.timerReset <- struct{}{}
 	}()
 	b.log.Named("announcer").Debug("reset timers")
 }
@@ -27,7 +27,7 @@ func (b *bot) Announce(ctx context.Context) {
 
 	for {
 		select {
-		case <-b.announcer:
+		case <-b.timerReset:
 			l.Debug("received timer reset")
 			if !t.Stop() {
 				select {

@@ -56,10 +56,10 @@ var filter = mautrix.Filter{
 
 // bot represents our bot
 type bot struct {
-	Client    *mautrix.Client
-	cache     *ttlcache.Cache
-	announcer chan struct{}
-	log       *zap.Logger
+	Client     *mautrix.Client
+	cache      *ttlcache.Cache
+	timerReset chan struct{}
+	log        *zap.Logger
 }
 
 func New(homeserverURL, userID, accessToken string, log *zap.Logger) (b *bot, err error) {
@@ -99,7 +99,7 @@ func New(homeserverURL, userID, accessToken string, log *zap.Logger) (b *bot, er
 	syncer.OnEventType(event.EventMessage, b.handleMessage)
 	syncer.OnEventType(event.StateMember, b.handleMembership)
 
-	b.announcer = make(chan struct{})
+	b.timerReset = make(chan struct{})
 
 	return b, nil
 }
