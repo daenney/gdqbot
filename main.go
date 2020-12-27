@@ -18,6 +18,9 @@ func main() {
 	token := flag.String("access-token", "", "Access token, or use the GDQBOT_ACCESS_TOKEN environment variable")
 	user := flag.String("user", "", "Matrix ID for the bot, @bot:domain.tld")
 	showVersion := flag.Bool("version", false, "show GDQBot version and build info")
+	debug := flag.Bool("debug", false, "enable debug output")
+	format := flag.String("log.format", "console", "one of json or console")
+	formatTime := flag.Bool("log.timestamp", true, "include timestamp in log output")
 
 	flag.Parse()
 
@@ -41,11 +44,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "No access token specified, please specify using -access-token or set the GDQBOT_ACCESS_TOKEN environment variable")
 	}
 
-	l, err := zap.NewDevelopment()
-	if err != nil {
-		panic(err)
-	}
-
+	l := bot.NewLogger(*debug, *format, *formatTime)
 	b, err := bot.New(*hs, *user, *token, l)
 	if err != nil {
 		l.Error("failed to initialise", zap.Error(err))
