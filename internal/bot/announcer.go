@@ -12,6 +12,7 @@ import (
 
 func (b *bot) Announce(ctx context.Context) {
 	l := b.log.Named("announcer")
+	l.Info("started routine")
 
 	var last string
 	for {

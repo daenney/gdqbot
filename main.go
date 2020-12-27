@@ -65,7 +65,6 @@ func main() {
 
 	go func(ctx context.Context) {
 		b.Announce(ctx)
-		l.Info("started announcer routine")
 	}(ctx)
 
 	c := make(chan os.Signal)
