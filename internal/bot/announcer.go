@@ -2,15 +2,17 @@ package bot
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/daenney/gdq"
+	"go.uber.org/zap"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
 )
 
 func (b *bot) Announce(ctx context.Context) {
+	l := b.log.Named("announcer")
+
 	var last string
 	for {
 		select {
@@ -34,7 +36,9 @@ func (b *bot) Announce(ctx context.Context) {
 			}
 
 			if last == ev.Title {
-				log.Printf("already announced: %s, skipping", ev.Title)
+				l.Debug("not announcing event",
+					zap.String("reason", "already announced"),
+					zap.String("event", ev.Title))
 				b.announcer.Reset(dur)
 				continue
 			}
@@ -42,13 +46,21 @@ func (b *bot) Announce(ctx context.Context) {
 			if dur > 10*time.Minute {
 				// We don't want to announce events more than 10min
 				// before the start time
-				log.Printf("not announcing: %s, event is too far in the future: %s\n", ev.Title, dur)
+				l.Debug("not announcing event",
+					zap.String("reason", "too far in the future"),
+					zap.String("event", ev.Title),
+					zap.String("duration", dur.String()),
+					zap.Time("start", ev.Start))
 				b.announcer.Reset(dur - 10*time.Minute)
 				continue
 			}
 
 			// It's time to announce something!
-			log.Printf("announcing: %s, duration is: %s\n", ev.Title, dur)
+			l.Debug("announcing event",
+				zap.String("event", ev.Title),
+				zap.String("duration", dur.String()),
+				zap.Time("start", ev.Start))
+
 			rooms, err := b.Client.JoinedRooms()
 			if err != nil {
 				// Assume some temporary issue occurred, retry in a bit
@@ -59,7 +71,9 @@ func (b *bot) Announce(ctx context.Context) {
 			for _, room := range rooms.JoinedRooms {
 				members, err := b.Client.JoinedMembers(room)
 				if err != nil {
-					log.Printf("failed to retrieve memberships for room: %s", room)
+					l.Error("failed to retrieve memberships",
+						zap.String("room", room.String()),
+						zap.Error(err))
 					// Skip rooms we can't figure out the members for
 					continue
 				}
@@ -72,12 +86,18 @@ func (b *bot) Announce(ctx context.Context) {
 			for _, room := range sendTo {
 				_, err := b.Client.SendMessageEvent(room, event.EventMessage, msg)
 				if err != nil {
-					log.Printf("failed to announce event: %s to room: %s\n", ev.Title, room)
+					l.Error("failed to announce event",
+						zap.String("event", ev.Title),
+						zap.String("room", room.String()),
+						zap.Error(err))
 				}
 			}
 
 			last = ev.Title
 			// Reset the timer to fire once the event we just announced has started
+			l.Debug("announced event",
+				zap.String("event", ev.Title),
+				zap.String("sleep", dur.String()))
 			b.announcer.Reset(dur)
 		case <-ctx.Done():
 			if !b.announcer.Stop() {

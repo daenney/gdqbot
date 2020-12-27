@@ -2,12 +2,12 @@ package bot
 
 import (
 	"bufio"
-	"log"
 	"strings"
 	"time"
 
 	"github.com/ReneKroon/ttlcache/v2"
 	"github.com/daenney/gdq"
+	"go.uber.org/zap"
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
@@ -59,9 +59,10 @@ type bot struct {
 	Client    *mautrix.Client
 	cache     *ttlcache.Cache
 	announcer *time.Timer
+	log       *zap.Logger
 }
 
-func New(homeserverURL, userID, accessToken string) (b *bot, err error) {
+func New(homeserverURL, userID, accessToken string, log *zap.Logger) (b *bot, err error) {
 	uid := id.UserID(userID)
 	client, err := newMatrixClient(homeserverURL, uid, accessToken)
 	if err != nil {
@@ -71,6 +72,7 @@ func New(homeserverURL, userID, accessToken string) (b *bot, err error) {
 	b = &bot{
 		Client: client,
 		cache:  ttlcache.NewCache(),
+		log:    log.Named("bot"),
 	}
 
 	b.cache.SkipTTLExtensionOnHit(true)
@@ -78,10 +80,11 @@ func New(homeserverURL, userID, accessToken string) (b *bot, err error) {
 	b.cache.SetLoaderFunction(func(key string) (data interface{}, ttl time.Duration, err error) {
 		s, err := gdq.GetSchedule(gdq.Latest, safeClient)
 		if err != nil {
-			log.Printf("loader: failed to load schedule into cache: %s\n", err)
+			b.log.Named("cache").Error("failed to load schedule into cache", zap.Error(err))
 		}
 		// reset the announcer timer when the cache gets reloaded to ensure
 		// we notice schedule changes
+		b.log.Named("announcer").Debug("re-evaluating timers due to cache refresh")
 		b.announcer.Reset(1 * time.Second)
 		return s, 10 * time.Minute, err
 	})
@@ -103,17 +106,19 @@ func New(homeserverURL, userID, accessToken string) (b *bot, err error) {
 }
 
 func (b *bot) primeCache() {
+	l := b.log.Named("cache")
 	s, err := gdq.GetSchedule(gdq.Latest, safeClient)
 	if err != nil {
-		log.Print("primer: failed to load cache with schedule")
+		l.Error("failed to prime cache with schedule", zap.Error(err))
 		return
 	}
 	b.cache.SetWithTTL("sched", s, 10*time.Minute)
-	log.Print("primer: loaded cache with schedule")
+	l.Info("primed cache with schedule")
 	return
 }
 
 func (b *bot) handleMessage(ms mautrix.EventSource, ev *event.Event) {
+	l := b.log.Named("message")
 	body := ev.Content.AsMessage().Body
 
 	r := strings.NewReader(body)
@@ -154,7 +159,7 @@ func (b *bot) handleMessage(ms mautrix.EventSource, ev *event.Event) {
 	}
 
 	if err != nil {
-		log.Printf("failed to get and filter schedule: %s", err)
+		l.Error("failed to get and filter schedule", zap.Error(err))
 		msg = &event.MessageEventContent{
 			Body: `Sorry, something went wrong handling your request. This usually means 
 			the GDQ schedule couldn't be retrieved. Please try again in a minute.`,
@@ -165,7 +170,7 @@ func (b *bot) handleMessage(ms mautrix.EventSource, ev *event.Event) {
 	msg.SetReply(ev)
 	_, err = b.Client.SendMessageEvent(ev.RoomID, event.EventMessage, msg)
 	if err != nil {
-		log.Printf("failed to send message: %s", err)
+		l.Error("failed to send message", zap.Error(err))
 	}
 }
 
@@ -181,12 +186,14 @@ func (b *bot) handleMembership(_ mautrix.EventSource, ev *event.Event) {
 		return
 	}
 
-	log.Print("attempting to join room: ", ev.RoomID)
+	l := b.log.Named("membership")
+
+	l.Info("attempting to join room", zap.String("room", ev.RoomID.String()))
 
 	time.Sleep(1 * time.Second)
 	_, err := b.Client.JoinRoom(ev.RoomID.String(), "", struct{}{})
 	if err != nil {
-		log.Printf("failed to join room: %s, error: %s\n", ev.RoomID, err.Error())
+		l.Error("failed to join room", zap.String("room", ev.RoomID.String()), zap.Error(err))
 	}
 
 	return

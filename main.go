@@ -4,12 +4,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/daenney/gdqbot/internal/bot"
+
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -26,29 +27,36 @@ func main() {
 	}
 
 	if *hs == "" {
-		log.Fatalln("No homeserver specified, please specify using -homeserver")
+		fmt.Fprintln(os.Stderr, "No homeserver specified, please specify using -homeserver")
+		os.Exit(1)
 	}
 	if *user == "" {
-		log.Fatalln("No username specified, please specify using -user")
+		fmt.Fprintln(os.Stderr, "No username specified, please specify using -user")
+		os.Exit(1)
 	}
 	if *token == "" {
 		*token = os.Getenv("GDQBOT_ACCESS_TOKEN")
 	}
 	if *token == "" {
-		log.Fatalln("No access token specified, please specify using -access-token or set the GDQBOT_ACCESS_TOKEN environment variable")
+		fmt.Fprintln(os.Stderr, "No access token specified, please specify using -access-token or set the GDQBOT_ACCESS_TOKEN environment variable")
 	}
 
-	b, err := bot.New(*hs, *user, *token)
+	l, err := zap.NewDevelopment()
 	if err != nil {
-		log.Fatalln(fmt.Errorf("couldn't initialise the bot: %s", err))
+		panic(err)
 	}
 
-	log.Print("syncing timeline and handling requests")
+	b, err := bot.New(*hs, *user, *token, l)
+	if err != nil {
+		l.Error("failed to initialise", zap.Error(err))
+	}
+
+	l.Info("syncing timeline and handling requests")
 
 	go func() {
 		if err := b.Client.Sync(); err != nil {
 			b.Client.Client.CloseIdleConnections()
-			log.Fatalf("sync encountered an error: %s\n", err)
+			l.Error("sync encountered an error", zap.Error(err))
 		}
 	}()
 
@@ -57,16 +65,17 @@ func main() {
 
 	go func(ctx context.Context) {
 		b.Announce(ctx)
-		log.Println("started announcer routine")
+		l.Info("started announcer routine")
 	}(ctx)
 
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
 	s := <-c
-	log.Printf("received %s, shutting down...", s.String())
 	cancel()
 	b.Client.StopSync()
+	l.Sync()
+	fmt.Fprintf(os.Stdout, fmt.Sprintf("received %s, shutting down...", s.String()))
 	b.Client.Client.CloseIdleConnections()
 	os.Exit(0)
 }
