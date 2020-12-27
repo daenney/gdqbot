@@ -123,9 +123,6 @@ func (b *bot) Announce(ctx context.Context) {
 
 		last = ev.Title
 		// Reset the timer to fire once the event we just announced has started
-		l.Debug("announced event",
-			zap.String("event", ev.Title),
-			zap.String("sleep", dur.String()))
 		t.Reset(dur)
 	}
 }
