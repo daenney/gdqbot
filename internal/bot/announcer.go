@@ -28,6 +28,7 @@ func (b *bot) Announce(ctx context.Context) {
 	for {
 		select {
 		case <-b.announcer:
+			l.Debug("received timer reset")
 			if !t.Stop() {
 				select {
 				case <-t.C:
@@ -35,6 +36,7 @@ func (b *bot) Announce(ctx context.Context) {
 				}
 			}
 		case <-ctx.Done():
+			l.Debug("context cancelled")
 			if !t.Stop() {
 				select {
 				case <-t.C:
@@ -43,6 +45,7 @@ func (b *bot) Announce(ctx context.Context) {
 			}
 			return
 		case <-t.C:
+			l.Debug("timer fired")
 		}
 
 		s, err := b.cache.Get("sched")
