@@ -48,10 +48,21 @@ can/should be run as read-only.
 #### `docker run`
 
 ```sh
-$ docker run --name matrix-gdqbot -e GDQBOT_ACCESS_TOKEN=<token> ghcr.io/daeney/gdqbot:<tag> \
-  -homeserver https://example.com \
-  -user @gdqbot:example.com
+$ docker run --rm --name gdqbot \
+	--cap-drop=ALL \
+	--read-only \
+  -e GDQBOT_ACCESS_TOKEN \
+	ghcr.io/daenney/gdqbot:<arch>-<tag> \
+	-homeserver <domain.tld> \
+	-user @<bot>:<domain.tld>
 ```
+
+The `-e GDQBOT_ACCESS_TOKEN` will read that environment variable from
+your current environment and set it in the environment of the container.
+
+You can instead pass `--env-file` which should point to a file containing any
+environment variables you want set. In this case, it should have
+`GDQBOT_ACCESS_TOKEN=<value>`.
 
 #### `docker-compose`
 
@@ -60,17 +71,21 @@ $ docker run --name matrix-gdqbot -e GDQBOT_ACCESS_TOKEN=<token> ghcr.io/daeney/
 version: "2.0"
 
 services:
-  matrix-gdq-bot:
-    image: ghcr.io/daenney/gdqbot:<tag>
-    container_name: matrix-gdqbot
+  gdqbot:
+    image: ghcr.io/daenney/gdqbot:<arch>-<tag>
+    container_name: gdqbot
     restart: unless-stopped
     command:
       - -homeserver https://example.com
       - -user @gdqbot:example.com
     environment:
-      - GDQBOT_ACCESS_TOKEN=secret_value_goes_here
-
+      - GDQBOT_ACCESS_TOKEN
+    cap_drop:
+      - ALL
+    read_only: true
 ```
+
+Just like with `docker run`, you can use `env_file` instead.
 
 ## Building
 
