@@ -38,6 +38,12 @@ from v0.1.4 onwards. You can find them [over here](https://github.com/daenney/gd
 
 <b id="f1"><sup>1</sup></b> Pending Go 1.16 release [↩](#a1)
 
+In order to run the bot you'll need an access token for the bot's Matrix account:
+
+```sh
+$ GDQBOT_ACCESS_TOKEN=$(curl -s --data '{"identifier": {"type": "m.id.user", "user": "<localpart>" }, "password": "<password>", "type": "m.login.password", "device_id": "GDQBot", "initial_device_display_name": "GDQBot"}' https://<homeserver.tld>/_matrix/client/r0/login | jq -r '.access_token')
+```
+
 ### Docker
 
 All Docker images use [distroless as the base](https://github.com/GoogleContainerTools/distroless)
@@ -51,7 +57,7 @@ can/should be run as read-only.
 $ docker run --rm --name gdqbot \
 	--cap-drop=ALL \
 	--read-only \
-  -e GDQBOT_ACCESS_TOKEN \
+	-e GDQBOT_ACCESS_TOKEN \
 	ghcr.io/daenney/gdqbot:<arch>-<tag> \
 	-homeserver <domain.tld> \
 	-user @<bot>:<domain.tld>
