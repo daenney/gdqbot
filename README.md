@@ -17,8 +17,9 @@ This [Matrix](https://matrix.org) bot lets you:
 * Announces upcoming events into all joined rooms (except if rooms have less
   than three participants because that's our heuristic for a DM)
 
-Add the bot to a server, open a DM and issue `!gdq` or `!gdq help` to get
-instructions.
+You can invite [`@gdqbot:ecef.xyz`](https://matrix.to/#/@gdqbot:ecef.xyz) into a
+channel or come hang out in [`#gdq:ecef.xyz`](https://matrix.to/#/#gdq:ecef.xyz).
+You can also run your own bot.
 
 This bot is built using the [GDQ Go library](https://github.com/daenney/gdq).
 
