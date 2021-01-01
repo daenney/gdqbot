@@ -34,7 +34,7 @@ func TestHTMLMessage(t *testing.T) {
 		Estimate: gdq.Duration{Duration: 20 * time.Minute},
 	}
 	f := htmlEvent(e)
-	assertEqual(t, f, "<b>first game</b> on Tuesday, the 1st of December at 13:37 UTC (2020) run by <i>first runner</i> with commentary from <i>first host</i> lasting 20 minutes")
+	assertEqual(t, f, "<b>first game</b> on Tuesday, the 1st of December at 13:37 UTC (2020) run by <i>first runner</i> and hosted by <i>first host</i> lasting 20 minutes")
 }
 
 func TestPlainMessage(t *testing.T) {
@@ -46,7 +46,7 @@ func TestPlainMessage(t *testing.T) {
 		Estimate: gdq.Duration{Duration: 20 * time.Minute},
 	}
 	f := plainEvent(e)
-	assertEqual(t, f, "first game on Tuesday, the 1st of December at 13:37 UTC (2020) run by first runner with commentary from first host lasting 20 minutes")
+	assertEqual(t, f, "first game on Tuesday, the 1st of December at 13:37 UTC (2020) run by first runner and hosted by first host lasting 20 minutes")
 }
 
 func TestMessageSchedule(t *testing.T) {
@@ -249,19 +249,19 @@ func TestMessageForRunnerHostEvent(t *testing.T) {
 			{
 				name: "no matching game", f: b.msgScheduleForEvent, filter: "x",
 				bodyMust:    []string{"are no events"},
-				bodyMustNot: []string{"on", "run by", "commentary", "lasting"},
+				bodyMustNot: []string{"on", "run by", "hosted by", "lasting"},
 				fbodyEmpty:  true,
 			},
 			{
 				name: "no matching host", f: b.msgScheduleForHost, filter: "x",
 				bodyMust:    []string{"are no events"},
-				bodyMustNot: []string{"on", "run by", "commentary", "lasting"},
+				bodyMustNot: []string{"on", "run by", "hosteby by", "lasting"},
 				fbodyEmpty:  true,
 			},
 			{
 				name: "no matching runner", f: b.msgScheduleForRunner, filter: "x",
 				bodyMust:    []string{"are no events"},
-				bodyMustNot: []string{"on", "run by", "commentary", "lasting"},
+				bodyMustNot: []string{"on", "run by", "hosted by", "lasting"},
 				fbodyEmpty:  true,
 			},
 			{

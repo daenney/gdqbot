@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	htmlEventMsg  = "<b>%s</b> on %s run by <i>%s</i> with commentary from <i>%s</i> lasting %s"
-	plainEventMsg = "%s on %s run by %s with commentary from %s lasting %s"
+	htmlEventMsg  = "<b>%s</b> on %s run by <i>%s</i> and hosted by <i>%s</i> lasting %s"
+	plainEventMsg = "%s on %s run by %s and hosted by %s lasting %s"
 	singleMatch   = "There is one event matching your query:"
 	multiMatch    = "There are multiple events matching your query:"
 	dateFormat    = "%s, the %s of %s at %02d:%02d UTC (%04d)"
