@@ -32,12 +32,10 @@ from v0.1.4 onwards. You can find them [over here](https://github.com/daenney/gd
 |---|---|---|---|
 |Windows|amd64|✅|❌|
 |macOS|amd64|✅|❌|
-|macOS|arm64/M1<sup id="a1">[1](#f1)</sup>|❌|❌|
+|macOS|arm64/M1|✅|❌|
 |Linux|amd64|✅|✅|
 |Linux|arm64|✅|✅|
 |Linux|armv7/amrhf|✅|✅|
-
-<b id="f1"><sup>1</sup></b> Pending Go 1.16 release [↩](#a1)
 
 In order to run the bot you'll need an access token for the bot's Matrix account:
 
