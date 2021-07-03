@@ -23,7 +23,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v2
       with:
-        go-version: '1.15.6'
+        go-version: '1.16.5'
     - name: Check formatting
       run: test -z $(gofmt -l **.go)
     - name: Run GDQBot tests
