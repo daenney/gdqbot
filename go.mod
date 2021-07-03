@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/ReneKroon/ttlcache/v2 v2.1.0
-	github.com/daenney/gdq v1.0.1
+	github.com/daenney/gdq/v2 v2.2.0
 	go.uber.org/zap v1.16.0
-	maunium.net/go/mautrix v0.8.1-0.20201226134146-471456108062
+	maunium.net/go/mautrix v0.9.13
 )

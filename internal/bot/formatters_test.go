@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/daenney/gdq"
+	"github.com/daenney/gdq/v2"
 )
 
 func assertEqual(t *testing.T, a interface{}, b interface{}) {
@@ -27,15 +27,19 @@ func assertNotNil(t *testing.T, a interface{}) {
 func TestFormatMetadata(t *testing.T) {
 	var tests = []struct {
 		name     string
-		event    *gdq.Event
+		event    *gdq.Run
 		runners  string
 		hosts    string
 		estimate string
 	}{
-		{name: "empty metadata", event: &gdq.Event{}, runners: "unknown", hosts: "unknown", estimate: "unknown amount of time"},
+		{name: "empty metadata", event: &gdq.Run{}, runners: "unknown", hosts: "unknown", estimate: "unknown amount of time"},
 		{name: "complete metadata",
-			event: &gdq.Event{
-				Runners:  []string{"runner 1", "runner 2", "runner 3"},
+			event: &gdq.Run{
+				Runners: gdq.Runners{
+					gdq.Runner{Handle: "runner 1"},
+					gdq.Runner{Handle: "runner 2"},
+					gdq.Runner{Handle: "runner 3"},
+				},
 				Hosts:    []string{"host 1", "host 2", "host 3"},
 				Estimate: gdq.Duration{Duration: 2*time.Hour + 5*time.Minute},
 			},

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/daenney/gdq"
+	"github.com/daenney/gdq/v2"
 	"go.uber.org/zap"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
@@ -55,7 +55,7 @@ func (b *bot) Announce(ctx context.Context) {
 			continue
 		}
 
-		ev := s.(*gdq.Schedule).NextEvent()
+		ev := s.(*gdq.Schedule).NextRun()
 		dur := ev.Start.Sub(time.Now().UTC())
 
 		if dur < 0 {

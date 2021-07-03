@@ -2,11 +2,12 @@ package bot
 
 import (
 	"bufio"
+	"context"
 	"strings"
 	"time"
 
 	"github.com/ReneKroon/ttlcache/v2"
-	"github.com/daenney/gdq"
+	"github.com/daenney/gdq/v2"
 	"go.uber.org/zap"
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
@@ -60,6 +61,8 @@ type bot struct {
 	cache      *ttlcache.Cache
 	timerReset chan struct{}
 	log        *zap.Logger
+	gdqClient  *gdq.Client
+	event      *gdq.Event
 }
 
 func New(homeserverURL, userID, accessToken string, log *zap.Logger) (b *bot, err error) {
@@ -70,15 +73,23 @@ func New(homeserverURL, userID, accessToken string, log *zap.Logger) (b *bot, er
 	}
 
 	b = &bot{
-		Client: client,
-		cache:  ttlcache.NewCache(),
-		log:    log.Named("bot"),
+		Client:    client,
+		cache:     ttlcache.NewCache(),
+		log:       log.Named("bot"),
+		gdqClient: gdq.New(context.Background(), safeClient),
 	}
+
+	ev, err := b.gdqClient.Latest()
+	if err != nil {
+		b.log.Fatal("unable to detect the latest GDQ event")
+	}
+
+	b.event = ev
 
 	b.cache.SkipTTLExtensionOnHit(true)
 	b.cache.SetTTL(10 * time.Minute)
 	b.cache.SetLoaderFunction(func(key string) (data interface{}, ttl time.Duration, err error) {
-		s, err := gdq.GetSchedule(gdq.Latest, safeClient)
+		s, err := b.gdqClient.Schedule(b.event)
 		if err != nil {
 			b.log.Named("cache").Error("failed to load schedule into cache", zap.Error(err))
 		}
@@ -106,7 +117,7 @@ func New(homeserverURL, userID, accessToken string, log *zap.Logger) (b *bot, er
 
 func (b *bot) primeCache() {
 	l := b.log.Named("cache")
-	s, err := gdq.GetSchedule(gdq.Latest, safeClient)
+	s, err := b.gdqClient.Schedule(b.event)
 	if err != nil {
 		l.Error("failed to prime cache with schedule", zap.Error(err))
 		return

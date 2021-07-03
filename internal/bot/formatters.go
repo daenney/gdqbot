@@ -5,11 +5,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daenney/gdq"
+	"github.com/daenney/gdq/v2"
 )
 
-func formatMetadata(event *gdq.Event) (runners, hosts, estimate string) {
-	runners = formatHandles(event.Runners)
+func formatMetadata(event *gdq.Run) (runners, hosts, estimate string) {
+	names := []string{}
+	for _, r := range event.Runners {
+		names = append(names, r.Handle)
+	}
+	runners = formatHandles(names)
 	hosts = formatHandles(event.Hosts)
 	estimate = "unknown amount of time"
 	if event.Estimate.Duration != 0 {

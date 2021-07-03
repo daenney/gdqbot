@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daenney/gdq"
+	"github.com/daenney/gdq/v2"
 	"maunium.net/go/mautrix/event"
 )
 
@@ -49,7 +49,7 @@ func (b *bot) msgScheduleNext() (*event.MessageEventContent, error) {
 		return nil, err
 	}
 
-	e := s.(*gdq.Schedule).NextEvent()
+	e := s.(*gdq.Schedule).NextRun()
 	if e == nil {
 		return &event.MessageEventContent{
 			Body:    "There are currently no further events scheduled.",
@@ -65,7 +65,7 @@ func (b *bot) msgScheduleNext() (*event.MessageEventContent, error) {
 	}, nil
 }
 
-func (b *bot) msgAnnounce(e *gdq.Event) *event.MessageEventContent {
+func (b *bot) msgAnnounce(e *gdq.Run) *event.MessageEventContent {
 	d := gdq.Duration{Duration: e.Start.Sub(time.Now().UTC())}
 	return &event.MessageEventContent{
 		Body:          fmt.Sprintf("An event is starting in approximately %s: %s", d, plainEvent(e)),
@@ -87,7 +87,7 @@ func (b *bot) msgHelp() (*event.MessageEventContent, error) {
 }
 
 func msgSchedule(s *gdq.Schedule) *event.MessageEventContent {
-	if len(s.Events) == 0 {
+	if len(s.Runs) == 0 {
 		return &event.MessageEventContent{
 			Body:    "There are no events matching your query.",
 			MsgType: event.MsgNotice,
@@ -96,16 +96,16 @@ func msgSchedule(s *gdq.Schedule) *event.MessageEventContent {
 
 	plainBuilder := strings.Builder{}
 	htmlBuilder := strings.Builder{}
-	if len(s.Events) == 1 {
+	if len(s.Runs) == 1 {
 		htmlBuilder.WriteString(singleMatch + "<br><ul>")
 		plainBuilder.WriteString(singleMatch + "\n")
 	}
-	if len(s.Events) > 1 {
+	if len(s.Runs) > 1 {
 		htmlBuilder.WriteString(multiMatch + "<br><ul>")
 		plainBuilder.WriteString(multiMatch + "\n")
 	}
-	num := len(s.Events)
-	for i, event := range s.Events {
+	num := len(s.Runs)
+	for i, event := range s.Runs {
 		htmlBuilder.WriteString("<li>" + htmlEvent(event) + "</li>")
 		plainBuilder.WriteString("* " + plainEvent(event) + "\n")
 		if i == num-1 {
@@ -121,12 +121,12 @@ func msgSchedule(s *gdq.Schedule) *event.MessageEventContent {
 	}
 }
 
-func plainEvent(event *gdq.Event) string {
+func plainEvent(event *gdq.Run) string {
 	runners, hosts, estimate := formatMetadata(event)
 	return fmt.Sprintf(plainEventMsg, event.Title, formatDate(event.Start), runners, hosts, estimate)
 }
 
-func htmlEvent(event *gdq.Event) string {
+func htmlEvent(event *gdq.Run) string {
 	runners, hosts, estimate := formatMetadata(event)
 	return fmt.Sprintf(htmlEventMsg, event.Title, formatDate(event.Start), runners, hosts, estimate)
 }
