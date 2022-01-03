@@ -21,6 +21,7 @@ func main() {
 	debug := flag.Bool("debug", false, "enable debug output")
 	format := flag.String("log.format", "console", "one of json or console")
 	formatTime := flag.Bool("log.timestamp", true, "include timestamp in log output")
+	event := flag.String("event", "", "Event ID or name for the bot to use")
 
 	flag.Parse()
 
@@ -45,7 +46,7 @@ func main() {
 	}
 
 	l := bot.NewLogger(*debug, *format, *formatTime)
-	b, err := bot.New(*hs, *user, *token, l)
+	b, err := bot.New(*hs, *user, *token, *event, l)
 	if err != nil {
 		l.Error("failed to initialise", zap.Error(err))
 	}

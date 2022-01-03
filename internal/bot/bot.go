@@ -3,6 +3,7 @@ package bot
 import (
 	"bufio"
 	"context"
+	"strconv"
 	"strings"
 	"time"
 
@@ -65,23 +66,42 @@ type bot struct {
 	event      *gdq.Event
 }
 
-func New(homeserverURL, userID, accessToken string, log *zap.Logger) (b *bot, err error) {
+func New(homeserverURL, userID, accessToken, eventID string, log *zap.Logger) (*bot, error) {
 	uid := id.UserID(userID)
 	client, err := newMatrixClient(homeserverURL, uid, accessToken)
 	if err != nil {
 		return nil, err
 	}
 
-	b = &bot{
+	b := &bot{
 		Client:    client,
 		cache:     ttlcache.NewCache(),
 		log:       log.Named("bot"),
 		gdqClient: gdq.New(context.Background(), safeClient),
 	}
 
-	ev, err := b.gdqClient.Latest()
-	if err != nil {
-		b.log.Fatal("unable to detect the latest GDQ event")
+	var ev *gdq.Event
+	if eventID == "" {
+		ev, err = b.gdqClient.Latest()
+		if err != nil {
+			b.log.Fatal("unable to detect the latest GDQ event")
+		}
+	} else {
+		v, ok := gdq.GetEventByName(eventID)
+		if !ok {
+			num, err := strconv.ParseUint(eventID, 10, 64)
+			if err != nil {
+				b.log.Fatal("could not find an event matching the ID", zap.String("event", eventID))
+			}
+			v, ok = gdq.GetEventByID(uint(num))
+			if !ok {
+				ev = &gdq.Event{ID: uint(num), Short: "unknown", Name: "unknown", Year: 0}
+			} else {
+				ev = v
+			}
+		} else {
+			ev = v
+		}
 	}
 
 	b.event = ev
