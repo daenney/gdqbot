@@ -9,7 +9,7 @@ import (
 	"maunium.net/go/mautrix/id"
 )
 
-const userAgent = "gdqbot (+https://github.com/daenney/gdq)"
+const userAgent = "gdqbot (+https://github.com/daenney/gdqbot)"
 
 type transport struct{}
 
