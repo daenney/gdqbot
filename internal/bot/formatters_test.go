@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/daenney/gdq/v2"
+	"github.com/daenney/gdq/v3"
 )
 
 func assertEqual(t *testing.T, a interface{}, b interface{}) {
@@ -25,7 +25,7 @@ func assertNotNil(t *testing.T, a interface{}) {
 }
 
 func TestFormatMetadata(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		name     string
 		event    *gdq.Run
 		runners  string
@@ -33,14 +33,19 @@ func TestFormatMetadata(t *testing.T) {
 		estimate string
 	}{
 		{name: "empty metadata", event: &gdq.Run{}, runners: "unknown", hosts: "unknown", estimate: "unknown amount of time"},
-		{name: "complete metadata",
+		{
+			name: "complete metadata",
 			event: &gdq.Run{
-				Runners: gdq.Runners{
-					gdq.Runner{Handle: "runner 1"},
-					gdq.Runner{Handle: "runner 2"},
-					gdq.Runner{Handle: "runner 3"},
+				Runners: []gdq.Talent{
+					{Name: "runner 1"},
+					{Name: "runner 2"},
+					{Name: "runner 3"},
 				},
-				Hosts:    []string{"host 1", "host 2", "host 3"},
+				Hosts: []gdq.Talent{
+					{Name: "host 1"},
+					{Name: "host 2"},
+					{Name: "host 3"},
+				},
 				Estimate: gdq.Duration{Duration: 2*time.Hour + 5*time.Minute},
 			},
 			runners:  "runner 1, runner 2 and runner 3",
@@ -57,19 +62,18 @@ func TestFormatMetadata(t *testing.T) {
 			assertEqual(t, estimate, tt.estimate)
 		})
 	}
-
 }
 
 func TestFormatHandles(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		name    string
-		handles []string
+		handles []gdq.Talent
 		res     string
 	}{
-		{name: "no handles", handles: []string{}, res: "unknown"},
-		{name: "one handle", handles: []string{"runner 1"}, res: "runner 1"},
-		{name: "two handles", handles: []string{"runner 1", "runner 2"}, res: "runner 1 and runner 2"},
-		{name: "more than two handles", handles: []string{"runner 1", "runner 2", "runner 3"}, res: "runner 1, runner 2 and runner 3"},
+		{name: "no handles", handles: []gdq.Talent{}, res: "unknown"},
+		{name: "one handle", handles: []gdq.Talent{{Name: "runner 1"}}, res: "runner 1"},
+		{name: "two handles", handles: []gdq.Talent{{Name: "runner 1"}, {Name: "runner 2"}}, res: "runner 1 and runner 2"},
+		{name: "more than two handles", handles: []gdq.Talent{{Name: "runner 1"}, {Name: "runner 2"}, {Name: "runner 3"}}, res: "runner 1, runner 2 and runner 3"},
 	}
 
 	for _, tt := range tests {
@@ -81,7 +85,7 @@ func TestFormatHandles(t *testing.T) {
 }
 
 func TestFormatDate(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		name string
 		time time.Time
 		res  string

@@ -22,6 +22,7 @@ func main() {
 	format := flag.String("log.format", "console", "one of json or console")
 	formatTime := flag.Bool("log.timestamp", true, "include timestamp in log output")
 	event := flag.String("event", "", "Event ID or name for the bot to use")
+	userAgent := flag.String("user-agent", "", "user-agent to use when querying. Set this to somewhere the GDQ can contact you in case your deployment misbehaves")
 
 	flag.Parse()
 
@@ -44,9 +45,12 @@ func main() {
 	if *token == "" {
 		fmt.Fprintln(os.Stderr, "No access token specified, please specify using -access-token or set the GDQBOT_ACCESS_TOKEN environment variable")
 	}
+	if *userAgent == "" {
+		fmt.Fprintln(os.Stderr, "No user-agent specified. Please set this to something the GDQ staff can use to contact you")
+	}
 
 	l := bot.NewLogger(*debug, *format, *formatTime)
-	b, err := bot.New(*hs, *user, *token, *event, l)
+	b, err := bot.New(*hs, *user, *token, *event, *userAgent, l)
 	if err != nil {
 		l.Error("failed to initialise", zap.Error(err))
 	}
@@ -60,21 +64,19 @@ func main() {
 		}
 	}()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	go func(ctx context.Context) {
 		b.Announce(ctx)
 	}(ctx)
 
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	<-ctx.Done()
+	stop()
+	fmt.Fprintf(os.Stdout, "initiating graceful shutdown, Ctrl+C again to force")
 
-	s := <-c
-	cancel()
 	b.Client.StopSync()
 	l.Sync()
-	fmt.Fprintf(os.Stdout, fmt.Sprintf("received %s, shutting down...", s.String()))
 	b.Client.Client.CloseIdleConnections()
 	os.Exit(0)
 }

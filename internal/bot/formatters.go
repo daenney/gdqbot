@@ -5,15 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daenney/gdq/v2"
+	"github.com/daenney/gdq/v3"
 )
 
 func formatMetadata(event *gdq.Run) (runners, hosts, estimate string) {
-	names := []string{}
-	for _, r := range event.Runners {
-		names = append(names, r.Handle)
-	}
-	runners = formatHandles(names)
+	runners = formatHandles(event.Runners)
 	hosts = formatHandles(event.Hosts)
 	estimate = "unknown amount of time"
 	if event.Estimate.Duration != 0 {
@@ -22,16 +18,21 @@ func formatMetadata(event *gdq.Run) (runners, hosts, estimate string) {
 	return runners, hosts, estimate
 }
 
-func formatHandles(elems []string) string {
+func formatHandles(elems []gdq.Talent) string {
 	switch len(elems) {
 	case 0:
 		return "unknown"
 	case 1:
-		return elems[0]
+		return elems[0].Name
 	case 2:
-		return fmt.Sprintf("%s and %s", elems[0], elems[1])
+		return fmt.Sprintf("%s and %s", elems[0].Name, elems[1].Name)
 	default:
-		return strings.Join(elems[0:len(elems)-1], ", ") + " and " + elems[len(elems)-1]
+		batch := elems[0 : len(elems)-1]
+		names := make([]string, 0, len(batch))
+		for _, t := range batch {
+			names = append(names, t.Name)
+		}
+		return strings.Join(names, ", ") + " and " + elems[len(elems)-1].Name
 	}
 }
 

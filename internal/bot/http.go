@@ -4,23 +4,22 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/id"
 )
 
-const userAgent = "gdqbot (+https://github.com/daenney/gdqbot)"
+type transport struct {
+	userAgent string
+}
 
-type transport struct{}
-
-func (*transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("User-Agent", userAgent)
+func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("User-Agent", t.userAgent)
 	return http.DefaultTransport.RoundTrip(req)
 }
 
-var safeClient = &http.Client{Transport: &transport{}}
-
-func newMatrixClient(homeserverURL string, userID id.UserID, accessToken string) (*mautrix.Client, error) {
+func newMatrixClient(userAgent string, homeserverURL string, userID id.UserID, accessToken string) (*mautrix.Client, error) {
 	if homeserverURL == "" {
 		return nil, fmt.Errorf("received empty homeserver URL")
 	}
@@ -35,9 +34,13 @@ func newMatrixClient(homeserverURL string, userID id.UserID, accessToken string)
 		AccessToken:   accessToken,
 		HomeserverURL: hsURL,
 		UserID:        userID,
-		Client:        safeClient,
-		Prefix:        mautrix.URLPath{"_matrix", "client", "r0"},
-		Syncer:        mautrix.NewDefaultSyncer(),
+		Client: &http.Client{
+			Transport: &transport{userAgent: userAgent},
+			Timeout:   60 * time.Second,
+		},
+		UserAgent: userAgent,
+		Prefix:    mautrix.URLPath{"_matrix", "client", "r0"},
+		Syncer:    mautrix.NewDefaultSyncer(),
 	}
 	store := mautrix.NewAccountDataStore(eventID, c)
 	c.Store = store
