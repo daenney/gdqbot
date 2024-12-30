@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/ReneKroon/ttlcache/v2"
-	"github.com/daenney/gdq/v2"
+	"github.com/daenney/gdq/v3"
 	"maunium.net/go/mautrix/event"
 )
 
@@ -25,13 +25,14 @@ func assertNotContains(t *testing.T, a string, b string) {
 	}
 	t.Errorf("Received '%s', expected to not contain '%s'", a, b)
 }
+
 func TestHTMLMessage(t *testing.T) {
 	e := &gdq.Run{
 		Title: "first game",
-		Runners: gdq.Runners{
-			gdq.Runner{Handle: "first runner"},
+		Runners: []gdq.Talent{
+			{Name: "first runner"},
 		},
-		Hosts:    []string{"first host"},
+		Hosts:    []gdq.Talent{{Name: "first host"}},
 		Start:    time.Date(2020, 12, 1, 13, 37, 0, 0, time.UTC),
 		Estimate: gdq.Duration{Duration: 20 * time.Minute},
 	}
@@ -42,10 +43,10 @@ func TestHTMLMessage(t *testing.T) {
 func TestPlainMessage(t *testing.T) {
 	e := &gdq.Run{
 		Title: "first game",
-		Runners: gdq.Runners{
-			gdq.Runner{Handle: "first runner"},
+		Runners: []gdq.Talent{
+			{Name: "first runner"},
 		},
-		Hosts:    []string{"first host"},
+		Hosts:    []gdq.Talent{{Name: "first host"}},
 		Start:    time.Date(2020, 12, 1, 13, 37, 0, 0, time.UTC),
 		Estimate: gdq.Duration{Duration: 20 * time.Minute},
 	}
@@ -62,10 +63,10 @@ func TestMessageSchedule(t *testing.T) {
 	t.Run("one event", func(t *testing.T) {
 		s := gdq.NewScheduleFrom([]*gdq.Run{{
 			Title: "first game",
-			Runners: gdq.Runners{
-				gdq.Runner{Handle: "first runner"},
+			Runners: []gdq.Talent{
+				{Name: "first runner"},
 			},
-			Hosts:    []string{"first host"},
+			Hosts:    []gdq.Talent{{Name: "first host"}},
 			Start:    time.Date(2020, 12, 1, 13, 37, 0, 0, time.UTC),
 			Estimate: gdq.Duration{Duration: 20 * time.Minute},
 		}})
@@ -91,19 +92,19 @@ func TestMessageSchedule(t *testing.T) {
 		s := gdq.NewScheduleFrom([]*gdq.Run{
 			{
 				Title: "first game",
-				Runners: gdq.Runners{
-					gdq.Runner{Handle: "first runner"},
+				Runners: []gdq.Talent{
+					{Name: "first runner"},
 				},
-				Hosts:    []string{"first host"},
+				Hosts:    []gdq.Talent{{Name: "first host"}},
 				Start:    time.Date(2020, 12, 1, 13, 37, 0, 0, time.UTC),
 				Estimate: gdq.Duration{Duration: 20 * time.Minute},
 			},
 			{
 				Title: "second game",
-				Runners: gdq.Runners{
-					gdq.Runner{Handle: "second runner"},
+				Runners: []gdq.Talent{
+					{Name: "second runner"},
 				},
-				Hosts:    []string{"second host"},
+				Hosts:    []gdq.Talent{{Name: "fisecondrst host"}},
 				Start:    time.Date(2020, 12, 1, 14, 37, 0, 0, time.UTC),
 				Estimate: gdq.Duration{Duration: 1*time.Hour + 5*time.Minute},
 			},
@@ -128,7 +129,6 @@ func TestMessageSchedule(t *testing.T) {
 			assertContains(t, content, "20 minutes</li>")
 			assertContains(t, content, "<li><b>second")
 			assertContains(t, content, "1 hour and 5 minutes</li></ul>")
-
 		})
 	})
 }
@@ -148,10 +148,10 @@ func TestNextEventMessage(t *testing.T) {
 			}
 			b.cache.Set("sched", gdq.NewScheduleFrom([]*gdq.Run{{
 				Title: "first game",
-				Runners: gdq.Runners{
-					gdq.Runner{Handle: "first runner"},
+				Runners: []gdq.Talent{
+					{Name: "first runner"},
 				},
-				Hosts:    []string{"first host"},
+				Hosts:    []gdq.Talent{{Name: "first host"}},
 				Start:    time.Date(1900, 12, 1, 13, 37, 0, 0, time.UTC),
 				Estimate: gdq.Duration{Duration: 20 * time.Minute},
 			}}))
@@ -166,10 +166,10 @@ func TestNextEventMessage(t *testing.T) {
 			}
 			b.cache.Set("sched", gdq.NewScheduleFrom([]*gdq.Run{{
 				Title: "first game",
-				Runners: gdq.Runners{
-					gdq.Runner{Handle: "first runner"},
+				Runners: []gdq.Talent{
+					{Name: "first runner"},
 				},
-				Hosts:    []string{"first host"},
+				Hosts:    []gdq.Talent{{Name: "first host"}},
 				Start:    time.Date(2100, 12, 1, 13, 37, 0, 0, time.UTC),
 				Estimate: gdq.Duration{Duration: 20 * time.Minute},
 			}}))
@@ -187,19 +187,19 @@ func TestNextEventMessage(t *testing.T) {
 			b.cache.Set("sched", gdq.NewScheduleFrom([]*gdq.Run{
 				{
 					Title: "first game",
-					Runners: gdq.Runners{
-						gdq.Runner{Handle: "first runner"},
+					Runners: []gdq.Talent{
+						{Name: "first runner"},
 					},
-					Hosts:    []string{"first host"},
+					Hosts:    []gdq.Talent{{Name: "first host"}},
 					Start:    time.Date(2100, 12, 1, 13, 37, 0, 0, time.UTC),
 					Estimate: gdq.Duration{Duration: 20 * time.Minute},
 				},
 				{
 					Title: "second game",
-					Runners: gdq.Runners{
-						gdq.Runner{Handle: "second runner"},
+					Runners: []gdq.Talent{
+						{Name: "second runner"},
 					},
-					Hosts:    []string{"second host"},
+					Hosts:    []gdq.Talent{{Name: "second host"}},
 					Start:    time.Date(2100, 12, 1, 14, 37, 0, 0, time.UTC),
 					Estimate: gdq.Duration{Duration: 1*time.Hour + 5*time.Minute},
 				},
@@ -226,41 +226,40 @@ func TestNextEventMessage(t *testing.T) {
 
 func TestMessageForRunnerHostEvent(t *testing.T) {
 	t.Run("with entries available in cache", func(t *testing.T) {
-
 		b := &bot{
 			cache: ttlcache.NewCache(),
 		}
 		b.cache.Set("sched", gdq.NewScheduleFrom([]*gdq.Run{
 			{
 				Title: "first game",
-				Runners: gdq.Runners{
-					gdq.Runner{Handle: "first runner"},
+				Runners: []gdq.Talent{
+					{Name: "first runner"},
 				},
-				Hosts:    []string{"first host"},
+				Hosts:    []gdq.Talent{{Name: "first host"}},
 				Start:    time.Date(2100, 12, 1, 13, 37, 0, 0, time.UTC),
 				Estimate: gdq.Duration{Duration: 20 * time.Minute},
 			},
 			{
 				Title: "second game",
-				Runners: gdq.Runners{
-					gdq.Runner{Handle: "second runner"},
+				Runners: []gdq.Talent{
+					{Name: "second runner"},
 				},
-				Hosts:    []string{"second host"},
+				Hosts:    []gdq.Talent{{Name: "second host"}},
 				Start:    time.Date(2100, 12, 1, 14, 37, 0, 0, time.UTC),
 				Estimate: gdq.Duration{Duration: 1*time.Hour + 5*time.Minute},
 			},
 			{
 				Title: "third game",
-				Runners: gdq.Runners{
-					gdq.Runner{Handle: "second runner"},
+				Runners: []gdq.Talent{
+					{Name: "second runner"},
 				},
-				Hosts:    []string{"second host"},
+				Hosts:    []gdq.Talent{{Name: "second host"}},
 				Start:    time.Date(2100, 12, 1, 14, 37, 0, 0, time.UTC),
 				Estimate: gdq.Duration{Duration: 1*time.Hour + 5*time.Minute},
 			},
 		}))
 
-		var tests = []struct {
+		tests := []struct {
 			name         string
 			f            filteredHandler
 			filter       string
@@ -359,7 +358,7 @@ func TestMessageForRunnerHostEvent(t *testing.T) {
 		b := &bot{
 			cache: ttlcache.NewCache(),
 		}
-		var tests = []struct {
+		tests := []struct {
 			name   string
 			f      filteredHandler
 			filter string
@@ -382,10 +381,10 @@ func TestAnnounceEventMessage(t *testing.T) {
 
 	msg := b.msgAnnounce(&gdq.Run{
 		Title: "first game",
-		Runners: gdq.Runners{
-			gdq.Runner{Handle: "first runner"},
+		Runners: []gdq.Talent{
+			{Name: "first runner"},
 		},
-		Hosts:    []string{"first host"},
+		Hosts:    []gdq.Talent{{Name: "first host"}},
 		Start:    time.Date(1900, 12, 1, 13, 37, 0, 0, time.UTC),
 		Estimate: gdq.Duration{Duration: 20 * time.Minute},
 	})

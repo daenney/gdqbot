@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/daenney/gdq/v2"
+	"github.com/daenney/gdq/v3"
 	"go.uber.org/zap"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
@@ -55,8 +55,9 @@ func (b *bot) Announce(ctx context.Context) {
 			continue
 		}
 
-		ev := s.(*gdq.Schedule).NextRun()
-		dur := ev.Start.Sub(time.Now().UTC())
+		tm := time.Now().UTC()
+		ev := s.(*gdq.Schedule).NextRun(tm)
+		dur := ev.Start.Sub(tm)
 
 		if dur < 0 {
 			// At this point there's no known future events so lets take a

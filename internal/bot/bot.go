@@ -3,12 +3,13 @@ package bot
 import (
 	"bufio"
 	"context"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/ReneKroon/ttlcache/v2"
-	"github.com/daenney/gdq/v2"
+	"github.com/daenney/gdq/v3"
 	"go.uber.org/zap"
 	"maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
@@ -66,26 +67,26 @@ type bot struct {
 	event      *gdq.Event
 }
 
-func New(homeserverURL, userID, accessToken, eventID string, log *zap.Logger) (*bot, error) {
+func New(homeserverURL, userID, accessToken, eventID string, userAgent string, log *zap.Logger) (*bot, error) {
 	uid := id.UserID(userID)
-	client, err := newMatrixClient(homeserverURL, uid, accessToken)
+	client, err := newMatrixClient(userAgent, homeserverURL, uid, accessToken)
 	if err != nil {
 		return nil, err
 	}
 
 	b := &bot{
-		Client:    client,
-		cache:     ttlcache.NewCache(),
-		log:       log.Named("bot"),
-		gdqClient: gdq.New(context.Background(), safeClient),
+		Client: client,
+		cache:  ttlcache.NewCache(),
+		log:    log.Named("bot"),
+		gdqClient: gdq.New(&http.Client{
+			Timeout:   30 * time.Second,
+			Transport: &transport{userAgent: userAgent},
+		}),
 	}
 
 	var ev *gdq.Event
 	if eventID == "" {
-		ev, err = b.gdqClient.Latest()
-		if err != nil {
-			b.log.Fatal("unable to detect the latest GDQ event")
-		}
+		b.log.Fatal("please pass an event ID")
 	} else {
 		v, ok := gdq.GetEventByName(eventID)
 		if !ok {
@@ -109,7 +110,7 @@ func New(homeserverURL, userID, accessToken, eventID string, log *zap.Logger) (*
 	b.cache.SkipTTLExtensionOnHit(true)
 	b.cache.SetTTL(10 * time.Minute)
 	b.cache.SetLoaderFunction(func(key string) (data interface{}, ttl time.Duration, err error) {
-		s, err := b.gdqClient.Schedule(b.event)
+		s, err := b.gdqClient.Schedule(context.TODO(), b.event.ID)
 		if err != nil {
 			b.log.Named("cache").Error("failed to load schedule into cache", zap.Error(err))
 		}
@@ -137,14 +138,13 @@ func New(homeserverURL, userID, accessToken, eventID string, log *zap.Logger) (*
 
 func (b *bot) primeCache() {
 	l := b.log.Named("cache")
-	s, err := b.gdqClient.Schedule(b.event)
+	s, err := b.gdqClient.Schedule(context.TODO(), b.event.ID)
 	if err != nil {
 		l.Error("failed to prime cache with schedule", zap.Error(err))
 		return
 	}
 	b.cache.SetWithTTL("sched", s, 10*time.Minute)
 	l.Info("primed cache with schedule")
-	return
 }
 
 func (b *bot) handleMessage(ms mautrix.EventSource, ev *event.Event) {
@@ -225,6 +225,4 @@ func (b *bot) handleMembership(_ mautrix.EventSource, ev *event.Event) {
 	if err != nil {
 		l.Error("failed to join room", zap.String("room", ev.RoomID.String()), zap.Error(err))
 	}
-
-	return
 }

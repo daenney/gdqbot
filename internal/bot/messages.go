@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daenney/gdq/v2"
+	"github.com/daenney/gdq/v3"
 	"maunium.net/go/mautrix/event"
 )
 
@@ -49,7 +49,7 @@ func (b *bot) msgScheduleNext() (*event.MessageEventContent, error) {
 		return nil, err
 	}
 
-	e := s.(*gdq.Schedule).NextRun()
+	e := s.(*gdq.Schedule).NextRun(time.Now().UTC())
 	if e == nil {
 		return &event.MessageEventContent{
 			Body:    "There are currently no further events scheduled.",
@@ -87,7 +87,7 @@ func (b *bot) msgHelp() (*event.MessageEventContent, error) {
 }
 
 func msgSchedule(s *gdq.Schedule) *event.MessageEventContent {
-	if len(s.Runs) == 0 {
+	if s == nil || len(s.Runs) == 0 {
 		return &event.MessageEventContent{
 			Body:    "There are no events matching your query.",
 			MsgType: event.MsgNotice,
